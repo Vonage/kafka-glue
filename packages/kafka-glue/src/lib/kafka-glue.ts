@@ -1,3 +1,2 @@
-export function kafkaGlue(): string {
-  return 'kafka-glue';
-}
+export { Consumer } from './consumer/consumer';
+export { ConsumerConfig } from './consumer/config'
