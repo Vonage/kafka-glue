@@ -1,14 +1,9 @@
 {
   "npmScope": "kafka-glue",
-  "affected": {
-    "defaultBase": "master"
-  },
+  "affected": { "defaultBase": "master" },
   "implicitDependencies": {
     "workspace.json": "*",
-    "package.json": {
-      "dependencies": "*",
-      "devDependencies": "*"
-    },
+    "package.json": { "dependencies": "*", "devDependencies": "*" },
     "tsconfig.base.json": "*",
     "tslint.json": "*",
     ".eslintrc.json": "*",
@@ -17,19 +12,12 @@
   "tasksRunnerOptions": {
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ]
-      }
+      "options": { "cacheableOperations": ["build", "lint", "test", "e2e"] }
     }
   },
-  "projects": {},
-  "workspaceLayout": {
-    "appsDir": "packages",
-    "libsDir": "packages"
-  }
+  "projects": {
+    "kafka-glue": { "tags": [] },
+    "nest-kafka-glue": { "tags": [] }
+  },
+  "workspaceLayout": { "appsDir": "packages", "libsDir": "packages" }
 }
