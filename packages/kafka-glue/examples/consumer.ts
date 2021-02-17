@@ -2,7 +2,7 @@ import { Consumer } from '../src/index';
 
 async function main() {
   const consumer = new Consumer({
-    glue: {
+    schema: {
       region: 'us-east-1',
       valueSchemaConfig: {
         SchemaId: {

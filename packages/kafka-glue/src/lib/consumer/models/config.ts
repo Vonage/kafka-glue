@@ -1,12 +1,20 @@
 import { GetSchemaVersionInput } from 'aws-sdk/clients/glue';
 import { ConsumerGlobalConfig, ConsumerTopicConfig } from 'node-rdkafka/config';
 
+export interface StringParserConfig {
+  encoding: 'utf-8' | 'ascii' | 'ucs2' | 'base64' | 'hex' | 'binary'
+}
+
+export type SchemaConfigOption = StringParserConfig | GetSchemaVersionInput
+export type ParseProtocols = 'avro' | 'string' | 'none';
 
 export interface ConsumerConfig {
-  glue: {
+  schema  : {
     region?: string;
-    valueSchemaConfig?: GetSchemaVersionInput,
-    keySchemaConfig?: GetSchemaVersionInput,
+    valueParserProtocol: ParseProtocols;
+    keyParserProtocol: ParseProtocols;
+    valueSchemaConfig?: SchemaConfigOption,
+    keySchemaConfig?: SchemaConfigOption,
     reloadInterval?: number;
   }
   kafka: {
@@ -15,3 +23,5 @@ export interface ConsumerConfig {
     globalConfig: ConsumerGlobalConfig
   }
 }
+
+Buffer.from('').toString();

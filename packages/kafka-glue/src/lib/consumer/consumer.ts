@@ -1,7 +1,7 @@
 import { ClientMetrics, KafkaConsumer, LibrdKafkaError, Message } from 'node-rdkafka';
-import { ConsumerConfig } from './models/config';
+import { ConsumerConfig, StringParserConfig } from './models/config';
 import { Glue } from 'aws-sdk';
-import { GetSchemaVersionResponse } from 'aws-sdk/clients/glue';
+import { GetSchemaVersionInput, GetSchemaVersionResponse } from 'aws-sdk/clients/glue';
 import { interval, Subject, Observable } from 'rxjs';
 import * as avro from 'avro-js';
 import { Log } from './models/log.model';
@@ -26,7 +26,7 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
 
   constructor(config: ConsumerConfig) {
     this.config = config;
-    this.glueClient = new Glue({ region: this.config.glue.region });
+    this.glueClient = new Glue({ region: this.config.schema.region });
     this.kafkaClient = new KafkaConsumer(this.config.kafka.globalConfig, this.config.kafka.topicConfig);
   }
 
@@ -35,7 +35,7 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
     Load schema and init consumer
     * */
     await this.updateSchemaDefinitions();
-    if (this.config.glue.reloadInterval && this.config.glue.reloadInterval !== 0) {
+    if (this.config.schema.reloadInterval && this.config.schema.reloadInterval !== 0) {
       this.registerSchemaReLoader();
     }
   }
@@ -59,11 +59,17 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
     this.onReadyCallback = func;
   }
 
+  canStartConsumer() {
+    if (this.config.schema.keyParserProtocol === 'avro' && !this.keySchemaParser) {
+      throw new Error('You are missing key parser, please make sure you init the consumer and that you have provided a valid keySchemaConfig');
+    }
+    if (this.config.schema.valueParserProtocol === 'avro' && !this.valueSchemaParser) {
+      throw new Error('You are missing value parser, please make sure you init the consumer and that you have provided a valid valueSchemaConfig');
+    }
+  }
 
   consume() {
-    if (!this.valueSchemaDefinition) {
-      throw new Error('Please make sure you init the consumer before consuming messages');
-    }
+    this.canStartConsumer();
 
     this.kafkaClient.on('event.log', (eventData: Log) => {
       this._logs.next(eventData);
@@ -81,8 +87,50 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
       this.kafkaClient.consume();
     });
     this.kafkaClient.on('data', (msg: KafkaMessage<ParsedValueInterface, ParsedKeyInterface>) => {
-      msg.parsedValue = this.valueSchemaParser.fromBuffer(msg.value);
-      msg.parsedKey = this.valueSchemaParser.fromBuffer(msg.key);
+      try {
+        switch (this.config.schema.valueParserProtocol) {
+          case 'string':
+            const encoding = (this.config.schema.valueSchemaConfig as StringParserConfig).encoding;
+            msg.parsedValue = msg.value.toString(encoding) as unknown as ParsedValueInterface;
+            break;
+          case 'avro':
+            msg.parsedValue = this.valueSchemaParser.fromBuffer(msg.value) as ParsedValueInterface;
+            break;
+          case 'none':
+            break;
+        }
+      } catch (e) {
+        const error: LibrdKafkaError = {
+          message: 'Failed to parse value according to valueParserProtocol',
+          code: 43,
+          errno: 43,
+          origin: 'ValueParser'
+        };
+        this._errors.next(error);
+      }
+      try {
+        switch (this.config.schema.keyParserProtocol) {
+          case 'string':
+            const encoding = (this.config.schema.keySchemaConfig as StringParserConfig).encoding;
+            msg.parsedKey = msg.key.toString(encoding) as unknown as ParsedKeyInterface;
+            break;
+          case 'avro':
+            msg.parsedKey = this.keySchemaParser.fromBuffer(msg.key) as ParsedKeyInterface;
+            break;
+          case 'none':
+            break;
+        }
+      } catch (e) {
+        const error: LibrdKafkaError = {
+          message: 'Failed to parse key according to keyParserProtocol',
+          code: 43,
+          errno: 43,
+          origin: 'ValueParser',
+          stack: e.stack,
+        };
+        this._errors.next(error);
+      }
+
       this._messages.next(msg);
     });
 
@@ -92,6 +140,7 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
         fac: 'DISCONNECTED',
         message: 'Disconnected connection: ' + arg.connectionOpened
       };
+      this._logs.next(log)
       this._logs.complete();
       this._errors.complete();
       this._messages.complete();
@@ -101,15 +150,19 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
   }
 
   async updateValueSchemaDefinition() {
-    const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.glue.valueSchemaConfig).promise();
-    this.valueSchemaDefinition = res.SchemaDefinition;
-    this.valueSchemaParser = avro.parse(this.valueSchemaDefinition);
+    if (this.config.schema.valueParserProtocol === 'avro') {
+      const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.schema.valueSchemaConfig as GetSchemaVersionInput).promise();
+      this.valueSchemaDefinition = res.SchemaDefinition;
+      this.valueSchemaParser = avro.parse(this.valueSchemaDefinition);
+    }
   }
 
   async updateKeySchemaDefinition() {
-    const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.glue.keySchemaConfig).promise();
-    this.keySchemaDefinition = res.SchemaDefinition;
-    this.keySchemaParser = avro.parse(this.keySchemaDefinition);
+    if (this.config.schema.keyParserProtocol === 'avro') {
+      const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.schema.keySchemaConfig as GetSchemaVersionInput).promise();
+      this.keySchemaDefinition = res.SchemaDefinition;
+      this.keySchemaParser = avro.parse(this.keySchemaDefinition);
+    }
   }
 
   async updateSchemaDefinitions() {
@@ -117,7 +170,7 @@ export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
   }
 
   registerSchemaReLoader() {
-    interval(this.config.glue.reloadInterval).subscribe(async (_) => {
+    interval(this.config.schema.reloadInterval).subscribe(async (_) => {
       console.log('Updating schema');
       await this.updateSchemaDefinitions();
     });
