@@ -1,19 +1,24 @@
-import { KafkaConsumer, LibrdKafkaError, Message } from 'node-rdkafka';
+import { ClientMetrics, KafkaConsumer, LibrdKafkaError, Message } from 'node-rdkafka';
 import { ConsumerConfig } from './models/config';
 import { Glue } from 'aws-sdk';
 import { GetSchemaVersionResponse } from 'aws-sdk/clients/glue';
-import { interval, BehaviorSubject, Subject, Observable } from 'rxjs';
+import { interval, Subject, Observable } from 'rxjs';
 import * as avro from 'avro-js';
 import { Log } from './models/log.model';
+import { KafkaMessage } from './models/message.model';
 
-export class Consumer {
+export class Consumer<ParsedValueInterface, ParsedKeyInterface> {
   config: ConsumerConfig;
   glueClient: Glue;
   kafkaClient: KafkaConsumer;
-  schemaDefinition: string;
-  schemaParser;
 
-  _messages: Subject<any> = new Subject<any>();
+  valueSchemaDefinition: string;
+  valueSchemaParser;
+
+  keySchemaDefinition: string;
+  keySchemaParser;
+
+  _messages: Subject<KafkaMessage<ParsedValueInterface, ParsedKeyInterface>> = new Subject<KafkaMessage<ParsedValueInterface, ParsedKeyInterface>>();
   _logs: Subject<Log> = new Subject<Log>();
   _errors: Subject<LibrdKafkaError> = new Subject<LibrdKafkaError>();
 
@@ -29,7 +34,7 @@ export class Consumer {
     /*
     Load schema and init consumer
     * */
-    await this.updateSchemaDefinition();
+    await this.updateSchemaDefinitions();
     if (this.config.glue.reloadInterval && this.config.glue.reloadInterval !== 0) {
       this.registerSchemaReLoader();
     }
@@ -46,7 +51,7 @@ export class Consumer {
     return this._errors.asObservable();
   }
 
-  get messages$(): Observable<Message> {
+  get messages$(): Observable<KafkaMessage<ParsedValueInterface, ParsedKeyInterface>> {
     return this._messages.asObservable();
   }
 
@@ -56,7 +61,7 @@ export class Consumer {
 
 
   consume() {
-    if (!this.schemaDefinition) {
+    if (!this.valueSchemaDefinition) {
       throw new Error('Please make sure you init the consumer before consuming messages');
     }
 
@@ -75,29 +80,46 @@ export class Consumer {
       this.kafkaClient.subscribe(this.config.kafka.topics);
       this.kafkaClient.consume();
     });
-    this.kafkaClient.on('data', (msg: Message) => {
-      msg.value = this.schemaParser.fromBuffer(msg.value);
+    this.kafkaClient.on('data', (msg: KafkaMessage<ParsedValueInterface, ParsedKeyInterface>) => {
+      msg.parsedValue = this.valueSchemaParser.fromBuffer(msg.value);
+      msg.parsedKey = this.valueSchemaParser.fromBuffer(msg.key);
       this._messages.next(msg);
     });
 
-    this.kafkaClient.on('disconnected', function(arg) {
-      console.log('consumer disconnected. ' + JSON.stringify(arg));
+    this.kafkaClient.on('disconnected', (arg: ClientMetrics) => {
+      const log: Log = {
+        severity: 0,
+        fac: 'DISCONNECTED',
+        message: 'Disconnected connection: ' + arg.connectionOpened
+      };
+      this._logs.complete();
+      this._errors.complete();
+      this._messages.complete();
     });
 
     this.kafkaClient.connect();
   }
 
-  async updateSchemaDefinition() {
-    await this.glueClient.getSchemaVersion(this.config.glue.schemaConfig).promise().then((res: GetSchemaVersionResponse) => {
-      this.schemaDefinition = res.SchemaDefinition;
-      this.schemaParser = avro.parse(this.schemaDefinition);
-    });
+  async updateValueSchemaDefinition() {
+    const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.glue.valueSchemaConfig).promise();
+    this.valueSchemaDefinition = res.SchemaDefinition;
+    this.valueSchemaParser = avro.parse(this.valueSchemaDefinition);
+  }
+
+  async updateKeySchemaDefinition() {
+    const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.glue.keySchemaConfig).promise();
+    this.keySchemaDefinition = res.SchemaDefinition;
+    this.keySchemaParser = avro.parse(this.keySchemaDefinition);
+  }
+
+  async updateSchemaDefinitions() {
+    await Promise.all([this.updateValueSchemaDefinition(), this.updateKeySchemaDefinition()]);
   }
 
   registerSchemaReLoader() {
     interval(this.config.glue.reloadInterval).subscribe(async (_) => {
       console.log('Updating schema');
-      await this.updateSchemaDefinition();
+      await this.updateSchemaDefinitions();
     });
   }
 }

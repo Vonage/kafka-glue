@@ -4,7 +4,7 @@ async function main() {
   const consumer = new Consumer({
     glue: {
       region: 'us-east-1',
-      schemaConfig: {
+      valueSchemaConfig: {
         SchemaId: {
           RegistryName: '---',
           SchemaName: '----'
