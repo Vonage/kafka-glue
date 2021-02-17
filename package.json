@@ -1,5 +1,9 @@
 {
   "name": "kafka-glue",
+  "author": "Shay Dahan",
+  "repository": {
+    "url": "https://github.com/Vonage/kafka-glue"
+  },
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -28,7 +32,8 @@
   "private": true,
   "dependencies": {
     "aws-sdk": "^2.844.0",
-    "node-rdkafka": "^2.10.1"
+    "node-rdkafka": "^2.10.1",
+    "avro-js": "^1.10.1"
   },
   "devDependencies": {
     "@nrwl/cli": "11.2.12",

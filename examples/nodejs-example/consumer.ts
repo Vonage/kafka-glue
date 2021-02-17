@@ -1,17 +1,22 @@
-import { Consumer } from '../src/index';
+import { Consumer } from '../../packages/kafka-glue/src';
 
 async function main() {
   const consumer = new Consumer({
     schema: {
       region: 'us-east-1',
+      valueParserProtocol: 'avro',
+      keyParserProtocol: 'string',
       valueSchemaConfig: {
         SchemaId: {
-          RegistryName: '---',
+          RegistryName: '----',
           SchemaName: '----'
         },
         SchemaVersionNumber: {
           LatestVersion: true
         }
+      },
+      keySchemaConfig: {
+        encoding: 'utf-8'
       }
     },
     kafka: {

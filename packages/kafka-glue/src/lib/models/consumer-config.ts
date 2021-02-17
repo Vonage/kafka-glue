@@ -8,15 +8,17 @@ export interface StringParserConfig {
 export type SchemaConfigOption = StringParserConfig | GetSchemaVersionInput
 export type ParseProtocols = 'avro' | 'string' | 'none';
 
+export interface SchemaConfig {
+  region?: string;
+  valueParserProtocol: ParseProtocols;
+  keyParserProtocol: ParseProtocols;
+  valueSchemaConfig?: SchemaConfigOption,
+  keySchemaConfig?: SchemaConfigOption,
+  reloadInterval?: number;
+}
+
 export interface ConsumerConfig {
-  schema  : {
-    region?: string;
-    valueParserProtocol: ParseProtocols;
-    keyParserProtocol: ParseProtocols;
-    valueSchemaConfig?: SchemaConfigOption,
-    keySchemaConfig?: SchemaConfigOption,
-    reloadInterval?: number;
-  }
+  schema: SchemaConfig,
   kafka: {
     topics: string[],
     topicConfig: ConsumerTopicConfig,
