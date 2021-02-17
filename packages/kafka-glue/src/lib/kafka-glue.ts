@@ -1,2 +1,2 @@
 export { Consumer } from './consumer/consumer';
-export { ConsumerConfig } from './consumer/config'
+export { ConsumerConfig } from './consumer/models/config'

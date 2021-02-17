@@ -6,7 +6,7 @@ async function main() {
       region: 'us-east-1',
       schemaConfig: {
         SchemaId: {
-          RegistryName: '----',
+          RegistryName: '---',
           SchemaName: '----'
         },
         SchemaVersionNumber: {
@@ -22,24 +22,27 @@ async function main() {
       globalConfig: {
         'enable.auto.offset.store': false,
         'enable.auto.commit': false,
-        'group.id': 'test',
+        'group.id': 'a',
         'security.protocol': 'ssl',
-        'metadata.broker.list': '----'
+        'metadata.broker.list': 'kafka.us-east-1.amazonaws.com:9094'
       }
     }
   });
+
+  // set callback that will be fired once kafkaClient is ready to subscribe
   consumer.onReady = (info, metadata) => {
     consumer.kafkaClient.assign([{ topic: 'test', partition: 0, offset: 1 }]);
   };
+
   await consumer.init();
   consumer.logs$.subscribe(log => {
-    console.log(log);
+    // console.log(log.message);
   });
   consumer.errors$.subscribe(err => {
     console.error(err);
   });
-  consumer.messages$.subscribe(log => {
-    console.log(log);
+  consumer.messages$.subscribe(msg => {
+    console.log(msg);
   });
   consumer.consume();
 

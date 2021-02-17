@@ -1,9 +1,10 @@
-import { KafkaConsumer, Message } from 'node-rdkafka';
-import { ConsumerConfig } from './config';
+import { KafkaConsumer, LibrdKafkaError, Message } from 'node-rdkafka';
+import { ConsumerConfig } from './models/config';
 import { Glue } from 'aws-sdk';
 import { GetSchemaVersionResponse } from 'aws-sdk/clients/glue';
 import { interval, BehaviorSubject, Subject, Observable } from 'rxjs';
 import * as avro from 'avro-js';
+import { Log } from './models/log.model';
 
 export class Consumer {
   config: ConsumerConfig;
@@ -13,11 +14,10 @@ export class Consumer {
   schemaParser;
 
   _messages: Subject<any> = new Subject<any>();
-  _logs: Subject<any> = new Subject<any>();
-  _errors: Subject<any> = new Subject<any>();
+  _logs: Subject<Log> = new Subject<Log>();
+  _errors: Subject<LibrdKafkaError> = new Subject<LibrdKafkaError>();
 
   onReadyCallback: (info, metadata) => void;
-  onErrorCallback: (err) => void;
 
   constructor(config: ConsumerConfig) {
     this.config = config;
@@ -35,11 +35,11 @@ export class Consumer {
     }
   }
 
-  get logs$(): Observable<any> {
+  get logs$(): Observable<Log> {
     return this._logs.asObservable();
   }
 
-  get errors$(): Observable<any> {
+  get errors$(): Observable<LibrdKafkaError> {
     /*
     Subscribe errors to get all consumer related errors
     */
@@ -60,13 +60,11 @@ export class Consumer {
       throw new Error('Please make sure you init the consumer before consuming messages');
     }
 
-    this.kafkaClient.on('event.log', (eventData) => {
-      // TODO create error type with consistant foramt
+    this.kafkaClient.on('event.log', (eventData: Log) => {
       this._logs.next(eventData);
     });
 
-    this.kafkaClient.on('event.error', (err) => {
-      // TODO create error type with consistant foramt
+    this.kafkaClient.on('event.error', (err: LibrdKafkaError) => {
       this._errors.next(err);
     });
 
@@ -74,9 +72,6 @@ export class Consumer {
       if (this.onReadyCallback) {
         this.onReadyCallback(info, metadata);
       }
-      // REMOVE FORM HERE
-
-      // TO HERE
       this.kafkaClient.subscribe(this.config.kafka.topics);
       this.kafkaClient.consume();
     });
