@@ -1,10 +1,14 @@
 {
   "name": "@vonage/kafka-glue",
-  "author": "Shay Dahan",
+  "author": "Vonage",
   "repository": {
     "url": "https://github.com/Vonage/kafka-glue"
   },
-  "version": "0.0.1",
+  "bugs": {
+    "url" : "https://github.com/Vonage/kafka-glue/issues",
+    "email" : "shay.dahan@vonage.com"
+  },
+  "version": "0.1.0",
   "dependencies": {
     "aws-sdk": "^2.844.0",
     "node-rdkafka": "^2.10.1",
