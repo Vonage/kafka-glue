@@ -14,7 +14,7 @@ export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
   keySchemaParser;
 
   constructor(config: SchemaConfig) {
-    this.config = {...config};
+    this.config = { ...config };
     this.glueClient = new Glue({ region: this.config.region });
   }
 
@@ -57,6 +57,24 @@ export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
         return this.keySchemaParser.fromBuffer(msgKey) as ParsedKeyInterface;
       case 'none':
         break;
+    }
+  }
+
+  public encodeWithValueSchema(msgValue: string): string | Buffer {
+    switch (this.config.valueParserProtocol) {
+      case 'avro':
+        return this.valueSchemaParser.toBuffer(msgValue) as Buffer;
+      default:
+        return Buffer.from(msgValue) as Buffer;
+    }
+  }
+
+  public encodeWithKeySchema(msgKey: string): string | Buffer {
+    switch (this.config.keyParserProtocol) {
+      case 'avro':
+        return this.keySchemaParser.toBuffer(msgKey) as Buffer;
+      default:
+        return Buffer.from(msgKey) as Buffer;
     }
   }
 

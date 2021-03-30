@@ -25,5 +25,3 @@ export interface ConsumerConfig {
     globalConfig: ConsumerGlobalConfig
   }
 }
-
-Buffer.from('').toString();
