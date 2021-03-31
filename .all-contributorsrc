@@ -1,0 +1,35 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "ShayDahan99",
+      "name": "0",
+      "avatar_url": "https://avatars.githubusercontent.com/u/67263555?v=4",
+      "profile": "https://github.com/ShayDahan99",
+      "contributions": [
+        "doc",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+          "login": "DanielNetzeriAm",
+          "name": "Daniel Netzer",
+          "avatar_url": "https://avatars.githubusercontent.com/u/35025244?v=4",
+          "profile": "https://github.com/DanielNetzeriAm",
+          "contributions": [
+            "ideas"
+          ]
+        },
+  ],
+  "contributorsPerLine": 2,
+  "projectName": "kafka-glue",
+  "projectOwner": "Vonage",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
