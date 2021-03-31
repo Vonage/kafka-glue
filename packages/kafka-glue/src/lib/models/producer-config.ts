@@ -1,15 +1,12 @@
-import {
-  ProducerGlobalConfig,
-  ProducerTopicConfig
-} from 'node-rdkafka/config';
+import { ProducerGlobalConfig, ProducerTopicConfig } from 'node-rdkafka/config';
 import { SchemaConfig } from './consumer-config';
 
 export interface ProducerConfig {
-  schema: SchemaConfig,
+  schema: SchemaConfig;
   kafka: {
-    topic: string,
+    topic: string;
     pullInterval: number;
-    topicConfig: ProducerTopicConfig
-    globalConfig: ProducerGlobalConfig
-  }
+    topicConfig: ProducerTopicConfig;
+    globalConfig: ProducerGlobalConfig;
+  };
 }

@@ -9,16 +9,12 @@
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": [
-              "packages/kafka-glue/**/*.ts"
-            ]
+            "lintFilePatterns": ["packages/kafka-glue/**/*.ts"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/packages/kafka-glue"
-          ],
+          "outputs": ["coverage/packages/kafka-glue"],
           "options": {
             "jestConfig": "packages/kafka-glue/jest.config.js",
             "passWithNoTests": true
@@ -26,57 +22,18 @@
         },
         "build": {
           "executor": "@nrwl/node:package",
-          "outputs": [
-            "{options.outputPath}"
-          ],
+          "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/packages/kafka-glue",
             "tsConfig": "packages/kafka-glue/tsconfig.lib.json",
             "packageJson": "packages/kafka-glue/package.json",
             "main": "packages/kafka-glue/src/index.ts",
-            "assets": [
-              "packages/kafka-glue/*.md"
-            ]
-          }
-        }
-      }
-    },
-    "nest-kafka-glue": {
-      "root": "packages/nest-kafka-glue",
-      "sourceRoot": "packages/nest-kafka-glue/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "packages/nest-kafka-glue/**/*.ts"
-            ]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/packages/nest-kafka-glue"
-          ],
-          "options": {
-            "jestConfig": "packages/nest-kafka-glue/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "build": {
-          "executor": "@nrwl/node:package",
-          "outputs": [
-            "{options.outputPath}"
-          ],
-          "options": {
-            "outputPath": "dist/packages/nest-kafka-glue",
-            "tsConfig": "packages/nest-kafka-glue/tsconfig.lib.json",
-            "packageJson": "packages/nest-kafka-glue/package.json",
-            "main": "packages/nest-kafka-glue/src/index.ts",
-            "assets": [
-              "packages/nest-kafka-glue/*.md"
-            ]
+            "assets": ["packages/kafka-glue/*.md"]
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "packages/kafka-glue/tsconfig.lib.prod.json"
+            }
           }
         }
       }

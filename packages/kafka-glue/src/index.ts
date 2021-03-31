@@ -1,1 +1,1 @@
-export * from './lib/kafka-glue';
+export * from './lib';

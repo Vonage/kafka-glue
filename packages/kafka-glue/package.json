@@ -2,13 +2,14 @@
   "name": "@vonage/kafka-glue",
   "author": "Vonage",
   "repository": {
-    "url": "https://github.com/Vonage/kafka-glue"
+    "url": "https://github.com/Vonage/kafka-glue",
+    "type": "git",
+    "directory": "packages/kafka-glue"
   },
   "bugs": {
-    "url" : "https://github.com/Vonage/kafka-glue/issues",
-    "email" : "shay.dahan@vonage.com"
+    "url": "https://github.com/Vonage/kafka-glue/issues"
   },
-  "version": "0.1.0",
+  "version": "0.0.1",
   "dependencies": {
     "aws-sdk": "^2.844.0",
     "node-rdkafka": "^2.10.1",

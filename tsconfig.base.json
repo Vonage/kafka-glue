@@ -15,8 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@vonage/kafka-glue": ["packages/kafka-glue/src/index.ts"],
-      "@vonage/nest-kafka-glue": ["packages/nest-kafka-glue/src/index.ts"]
+      "@vonage/kafka-glue": ["packages/kafka-glue/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
