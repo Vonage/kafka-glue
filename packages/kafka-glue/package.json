@@ -27,5 +27,6 @@
     "avro-js": "^1.10.1",
     "rxjs": "^6.6.3"
   },
+  "license": "Apache-2.0",
   "description": "kafka consumers and producers integrated with AWS Glue schema registry with RXJS for streaming"
 }
