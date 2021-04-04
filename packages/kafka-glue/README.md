@@ -1,6 +1,6 @@
 # kafka-glue
 
-Kafka Glue is a collection of libraries for kafka consumers and producers integrated with AWS Glue schema registry with RXJS to expose streaming of the kafka.
+Kafka Glue is a collection of libraries for kafka consumers and producers integrated with AWS Glue schema registry with RXJS to expose streaming of the kafka messages.
 
 ## Usage Examples
 ### Producer
