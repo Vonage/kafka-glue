@@ -2,7 +2,7 @@
 Kafka Glue is a collection of libraries for kafka consumers and producers integrated with AWS Glue schema registry with RXJS to expose streaming of the kafka.
 
 - 😎 For nodejs (typescript) docs please refer [here](./packages/kafka-glue/README.md)
-- 🦁 For NestJS docs please refer (coming soon)
+
 
 ## Contributors ✨
 
