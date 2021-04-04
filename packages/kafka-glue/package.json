@@ -12,11 +12,20 @@
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "javascript",
+    "node",
+    "kafka",
+    "aws",
+    "glue",
+    "schema"
+  ],
   "version": "0.0.1",
   "dependencies": {
     "aws-sdk": "^2.844.0",
     "node-rdkafka": "^2.10.1",
     "avro-js": "^1.10.1",
     "rxjs": "^6.6.3"
-  }
+  },
+  "description": "kafka consumers and producers integrated with AWS Glue schema registry with RXJS for streaming"
 }
