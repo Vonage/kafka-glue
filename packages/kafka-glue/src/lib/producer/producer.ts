@@ -3,7 +3,6 @@ import {
   DeliveryReport,
   HighLevelProducer,
   LibrdKafkaError,
-  MessageHeader,
   Metadata,
   NumberNullUndefined,
 } from 'node-rdkafka';
