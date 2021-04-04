@@ -9,6 +9,9 @@
   "bugs": {
     "url": "https://github.com/Vonage/kafka-glue/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.0.1",
   "dependencies": {
     "aws-sdk": "^2.844.0",
