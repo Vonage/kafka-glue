@@ -1,5 +1,5 @@
 {
-  "name": "@vonage/kafka-glue",
+  "name": "kafka-glue",
   "author": "Vonage",
   "repository": {
     "url": "https://github.com/Vonage/kafka-glue",
