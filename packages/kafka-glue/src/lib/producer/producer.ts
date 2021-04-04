@@ -3,8 +3,9 @@ import {
   DeliveryReport,
   HighLevelProducer,
   LibrdKafkaError,
-  MessageHeader, Metadata,
-  NumberNullUndefined
+  MessageHeader,
+  Metadata,
+  NumberNullUndefined,
 } from 'node-rdkafka';
 import { Subject, Observable } from 'rxjs';
 import { Log } from '../models/log.model';
@@ -24,21 +25,29 @@ export class Producer<ValueInterface, KeyInterface> {
 
   constructor(config: ProducerConfig) {
     this.config = { ...config };
-    this.kafkaClient = new HighLevelProducer(this.config.kafka.globalConfig, this.config.kafka.topicConfig);
-    this.schemaHandler = new SchemaHandler<ValueInterface, KeyInterface>(this.config.schema);
+    this.kafkaClient = new HighLevelProducer(
+      this.config.kafka.globalConfig,
+      this.config.kafka.topicConfig
+    );
+    this.schemaHandler = new SchemaHandler<ValueInterface, KeyInterface>(
+      this.config.schema
+    );
   }
 
   async init() {
-
     /*
     Load schema and init consumer
     * */
     await this.schemaHandler.init();
     if (!this.schemaHandler.hasKeyParser()) {
-      throw new Error('You are missing key parser, please make sure you init the consumer and that you have provided a valid keySchemaConfig');
+      throw new Error(
+        'You are missing key parser, please make sure you init the consumer and that you have provided a valid keySchemaConfig'
+      );
     }
     if (!this.schemaHandler.hasValueParser()) {
-      throw new Error('You are missing value parser, please make sure you init the consumer and that you have provided a valid valueSchemaConfig');
+      throw new Error(
+        'You are missing value parser, please make sure you init the consumer and that you have provided a valid valueSchemaConfig'
+      );
     }
     this.kafkaClient.setValueSerializer((v) => {
       return this.schemaHandler.encodeWithValueSchema(v);
@@ -72,7 +81,7 @@ export class Producer<ValueInterface, KeyInterface> {
       const log: Log = {
         severity: 0,
         fac: 'DISCONNECTED',
-        message: 'Disconnected connection: ' + arg.connectionOpened
+        message: 'Disconnected connection: ' + arg.connectionOpened,
       };
       this._logs.next(log);
       this._logs.complete();
@@ -86,11 +95,14 @@ export class Producer<ValueInterface, KeyInterface> {
 
   private async connect() {
     return new Promise<Metadata>((resolve, reject) => {
-      this.kafkaClient.connect({ topic: this.config.kafka.topic }, (err: LibrdKafkaError, data: Metadata)=> {
-        if (err) reject(err);
-        resolve(data);
-      });
-    })
+      this.kafkaClient.connect(
+        { topic: this.config.kafka.topic },
+        (err: LibrdKafkaError, data: Metadata) => {
+          if (err) reject(err);
+          resolve(data);
+        }
+      );
+    });
   }
 
   get logs$(): Observable<Log> {
@@ -112,16 +124,26 @@ export class Producer<ValueInterface, KeyInterface> {
     this.onReadyCallback = func;
   }
 
-
-  produce(message: ValueInterface, key: KeyInterface, timestamp: NumberNullUndefined = null, partition = null) {
-
-    this.kafkaClient.produce(this.config.kafka.topic, partition, message, key, timestamp, (err, offset) => {
-      if (err) {
-        this._errors.next(err);
+  produce(
+    message: ValueInterface,
+    key: KeyInterface,
+    timestamp: NumberNullUndefined = null,
+    partition = null
+  ) {
+    this.kafkaClient.produce(
+      this.config.kafka.topic,
+      partition,
+      message,
+      key,
+      timestamp,
+      (err, offset) => {
+        if (err) {
+          this._errors.next(err);
+        }
+        if (offset) {
+          this._offsetReport.next(offset);
+        }
       }
-      if (offset) {
-        this._offsetReport.next(offset);
-      }
-    });
+    );
   }
 }

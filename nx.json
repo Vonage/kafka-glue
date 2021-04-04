@@ -16,8 +16,7 @@
     }
   },
   "projects": {
-    "kafka-glue": { "tags": [] },
-    "nest-kafka-glue": { "tags": [] }
+    "kafka-glue": { "tags": [] }
   },
   "workspaceLayout": { "appsDir": "packages", "libsDir": "packages" }
 }

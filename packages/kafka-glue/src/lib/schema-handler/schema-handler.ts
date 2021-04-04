@@ -1,7 +1,10 @@
 import { SchemaConfig, StringParserConfig } from '../models/consumer-config';
 import { Glue } from 'aws-sdk';
 import { parse } from 'avro-js';
-import { GetSchemaVersionInput, GetSchemaVersionResponse } from 'aws-sdk/clients/glue';
+import {
+  GetSchemaVersionInput,
+  GetSchemaVersionResponse,
+} from 'aws-sdk/clients/glue';
 import { interval } from 'rxjs';
 
 export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
@@ -33,26 +36,34 @@ export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
   }
 
   public hasValueParser() {
-    return !(this.config.valueParserProtocol === 'avro' && !this.valueSchemaParser);
+    return !(
+      this.config.valueParserProtocol === 'avro' && !this.valueSchemaParser
+    );
   }
 
   public decodeWithValueSchema(msgValue: Buffer) {
+    const encoding = (this.config.valueSchemaConfig as StringParserConfig)
+      .encoding;
+
     switch (this.config.valueParserProtocol) {
       case 'string':
-        const encoding = (this.config.valueSchemaConfig as StringParserConfig).encoding;
-        return msgValue.toString(encoding) as unknown as ParsedValueInterface;
+        return (msgValue.toString(encoding) as unknown) as ParsedValueInterface;
       case 'avro':
-        return this.valueSchemaParser.fromBuffer(msgValue) as ParsedValueInterface;
+        return this.valueSchemaParser.fromBuffer(
+          msgValue
+        ) as ParsedValueInterface;
       case 'none':
         break;
     }
   }
 
   public decodeWithKeySchema(msgKey: Buffer) {
+    const encoding = (this.config.keySchemaConfig as StringParserConfig)
+      .encoding;
+
     switch (this.config.keyParserProtocol) {
       case 'string':
-        const encoding = (this.config.keySchemaConfig as StringParserConfig).encoding;
-        return msgKey.toString(encoding) as unknown as ParsedKeyInterface;
+        return (msgKey.toString(encoding) as unknown) as ParsedKeyInterface;
       case 'avro':
         return this.keySchemaParser.fromBuffer(msgKey) as ParsedKeyInterface;
       case 'none':
@@ -80,7 +91,11 @@ export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
 
   async updateValueSchemaDefinition() {
     if (this.config.valueParserProtocol === 'avro') {
-      const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.valueSchemaConfig as GetSchemaVersionInput).promise();
+      const res: GetSchemaVersionResponse = await this.glueClient
+        .getSchemaVersion(
+          this.config.valueSchemaConfig as GetSchemaVersionInput
+        )
+        .promise();
       this.valueSchemaDefinition = res.SchemaDefinition;
       this.valueSchemaParser = parse(this.valueSchemaDefinition);
     }
@@ -88,18 +103,23 @@ export class SchemaHandler<ParsedValueInterface, ParsedKeyInterface> {
 
   async updateKeySchemaDefinition() {
     if (this.config.keyParserProtocol === 'avro') {
-      const res: GetSchemaVersionResponse = await this.glueClient.getSchemaVersion(this.config.keySchemaConfig as GetSchemaVersionInput).promise();
+      const res: GetSchemaVersionResponse = await this.glueClient
+        .getSchemaVersion(this.config.keySchemaConfig as GetSchemaVersionInput)
+        .promise();
       this.keySchemaDefinition = res.SchemaDefinition;
       this.keySchemaParser = parse(this.keySchemaDefinition);
     }
   }
 
   async updateSchemaDefinitions() {
-    await Promise.all([this.updateValueSchemaDefinition(), this.updateKeySchemaDefinition()]);
+    await Promise.all([
+      this.updateValueSchemaDefinition(),
+      this.updateKeySchemaDefinition(),
+    ]);
   }
 
-  registerSchemaReLoader(i) {
-    interval(i).subscribe(async (_) => {
+  registerSchemaReLoader(i: number) {
+    interval(i).subscribe(async () => {
       await this.updateSchemaDefinitions();
     });
   }
