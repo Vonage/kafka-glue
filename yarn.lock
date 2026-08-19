@@ -1983,11 +1983,9 @@ atob@^2.1.2:
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
 avro-js@^1.10.1:
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/avro-js/-/avro-js-1.10.2.tgz#5eaa26249a8d772556f1a6f0cb0fae2e0f1c7788"
-  integrity sha512-lkZAFBR54pmXQDWjDpZVZWWIJwi/3T3NED16ooiJp+sl0acFkBOOGL1OMguIP5P9A0R33s+eevy3ATIyqnxGVA==
-  dependencies:
-    underscore "^1.12.0"
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/avro-js/-/avro-js-1.12.2.tgz#72ce654f1bfe40fbc3c74275c0406121dcdf9c79"
+  integrity sha512-SVfkg8nIQ0fYQL3a1HsgXUtBIX9M8Wym2YPQGZV6tBJy/YBC6tylt3gh1Np54C5duxRAm1nowT15eAxwmDYFpA==
 
 aws-sdk@^2.844.0:
   version "2.876.0"
@@ -9477,11 +9475,6 @@ unbox-primitive@^1.0.0:
     has-bigints "^1.0.1"
     has-symbols "^1.0.2"
     which-boxed-primitive "^1.0.2"
-
-underscore@^1.12.0:
-  version "1.12.1"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.1.tgz#7bb8cc9b3d397e201cf8553336d262544ead829e"
-  integrity sha512-hEQt0+ZLDVUMhebKxL4x1BTtDY7bavVofhZ9KZ4aI26X9SRaE+Y3m83XUL1UP2jn8ynjndwCCpEHdUG+9pP1Tw==
 
 union-value@^1.0.0:
   version "1.0.1"
